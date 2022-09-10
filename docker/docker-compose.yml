@@ -1,0 +1,23 @@
+version: '3.9'
+services:
+  database:
+    image: mysql:8.0.28
+    container_name: mysql8
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=chaltteok
+      - MYSQL_USER=chaltteok
+      - MYSQL_PASSWORD=chaltteok
+      - TZ=UTC
+    volumes:
+      - "./mysql/mysql-init-files/:/docker-entrypoint-initdb.d/"
+      - "./mysql/mysql-data:/var/lib/mysql"
+    ports:
+      - "3306:3306"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - chaltteok
+networks:
+  chaltteok:
+    name: chaltteokNetwork
+    driver: bridge
