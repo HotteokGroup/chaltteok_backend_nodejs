@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// NOTE: 통신사업자
+// Bander.banderId -------< Contract.banderId
+// Bander.banderId -------< Product.banderId
+model Bander {
+  banderId  Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  Contract Contract[]
+  Product  Product[]
+}
+
+// NOTE: 통신사 요금제 플랜
+// Contract.contractId -------< Product.contractId
+// Contract.banderId >------- Bander.banderId
+model Contract {
+  contractId  Int       @id @default(autoincrement())
+  banderId    Int
+  bandType    BandType
+  name        String
+  voice       Int?
+  sms         Int?
+  defaultData Int?
+  qosData     Int?
+  everyData   Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  Bander  Bander    @relation(fields: [banderId], references: [banderId])
+  Product Product[]
+}
+
+// NOTE: 제공 기술 타입
+enum BandType {
+  LTE
+  NR5G
+}
+
+// NOTE: 통신 기기
+// Device.deviceId -------< Product.deviceId
+model Device {
+  deviceId  Int       @id @default(autoincrement())
+  model     String
+  name      String
+  price     Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  Product Product[]
+}
+
+// NOTE: 요금제 판매
+// Product.banderId >------- Bander.banderId
+// Product.contractId >------- Contract.contractId
+// Product.deviceId? >------- Device.deviceId?
+model Product {
+  productId     Int       @id @default(autoincrement())
+  banderId      Int
+  contractId    Int
+  deviceId      Int?
+  isMvno        Boolean
+  name          String
+  joinCondition JoinType
+  price         Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  Bander   Bander    @relation(fields: [banderId], references: [banderId])
+  Contract Contract  @relation(fields: [contractId], references: [contractId])
+  Device   Device?   @relation(fields: [deviceId], references: [deviceId])
+  Benefit  Benefit[]
+}
+
+// NOTE: 가입유형
+enum JoinType {
+  NAC
+  MNP
+  HCN
+}
+
+// NOTE: 요금제 혜택
+model Benefit {
+  benefitId Int         @id @default(autoincrement())
+  productId Int
+  type      BenefitType
+  cycleType CycleType
+  name      String
+  price     Int
+  cycle     Int
+  count     Int
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  deletedAt DateTime?
+
+  Product Product @relation(fields: [productId], references: [productId])
+}
+
+// NOTE: 혜택 유형
+enum BenefitType {
+  DISCOUNT
+  COUPON
+}
+
+// NOTE: 혜택 지급 주기
+enum CycleType {
+  DAY
+  MONTH
+}
