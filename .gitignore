@@ -36,3 +36,6 @@ lerna-debug.log*
 
 # Docker, 개발환경
 docker/mysql
+
+# 상용환경 설정파일 제외
+environments/.prod.env
